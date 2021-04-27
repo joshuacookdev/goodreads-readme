@@ -7,6 +7,10 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System.Net;
+using System.Xml;
+using System.ServiceModel.Syndication;
+using System.Linq;
 
 namespace goodreads_readme
 {
@@ -19,17 +23,29 @@ namespace goodreads_readme
         {
             log.LogInformation("Goodreads request processed.");
 
-            string name = req.Query["name"];
-
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-            name = name ?? data?.name;
-
-            string responseMessage = string.IsNullOrEmpty(name)
-                ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
-                : $"Hello, {name}. This HTTP triggered function executed successfully.";
-
-            return new OkObjectResult(responseMessage);
+            Book mostRecent = GetMostRecentStarted();
+            string div = CreateDiv(mostRecent);
+            log.LogInformation(div);
+            return new OkObjectResult(div);
         }
+        
+        private static Book GetMostRecentStarted()
+        {
+            SyndicationFeed feed;
+            using (XmlReader reader = XmlReader.Create(GOODREADS_RSS_URL))
+            {
+                feed = SyndicationFeed.Load(reader);
+            }
+            var mostRecent = feed.Items.Where(i=>i.Summary.Text.Contains("reading")).FirstOrDefault();
+
+            return new Book(mostRecent);
+        }
+
+        private static string CreateDiv(Book book)
+        {
+            return "<html><div>"+book.ImageLink+"</div></html>";
+        }
+
+        private static string GOODREADS_RSS_URL => Environment.GetEnvironmentVariable("GOODREADS_RSS_URL");
     }
 }
