@@ -11,6 +11,7 @@ using System.Net;
 using System.Xml;
 using System.ServiceModel.Syndication;
 using System.Linq;
+using System.Text;
 
 namespace goodreads_readme
 {
@@ -24,9 +25,9 @@ namespace goodreads_readme
             log.LogInformation("Goodreads request processed.");
 
             Book mostRecent = GetMostRecentStarted();
-            string div = CreateDiv(mostRecent);
+            string div = CreateSVG(mostRecent);
             log.LogInformation(div);
-            return new OkObjectResult(div);
+            return new FileContentResult(Encoding.ASCII.GetBytes(div),"image/svg+xml");
         }
         
         private static Book GetMostRecentStarted()
@@ -41,9 +42,14 @@ namespace goodreads_readme
             return new Book(mostRecent);
         }
 
-        private static string CreateDiv(Book book)
+        private static string CreateSVG(Book book)
         {
-            return "<html><div>"+book.ImageLink+"</div></html>";
+            string svg = File.ReadAllText("./template.html");
+            //Commenting out in case I decide to add images back
+            //svg = svg.Replace("{{imageHTML}}",book.Image);
+            svg = svg.Replace("{{book_name}}",book.Title);
+            svg = svg.Replace("{{author}}",book.Author);
+            return svg;
         }
 
         private static string GOODREADS_RSS_URL => Environment.GetEnvironmentVariable("GOODREADS_RSS_URL");

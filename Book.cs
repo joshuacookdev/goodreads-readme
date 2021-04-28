@@ -8,13 +8,22 @@ namespace goodreads_readme
         internal Book(SyndicationItem item)
         {
             MatchCollection match = Regex.Matches(item.Summary.Text, anchorReg);
-            (ImageLink, TitleLink, AuthorLink) = (match[0].Value, match[1].Value, match[2].Value);
+            //Image = ParseImage(match[0].Value);
+            Title = ParseValue(match[1].Value);
+            Author = ParseValue(match[2].Value);
         }
 
-        const string anchorReg = "<a.*?/a>";
+        private static string ParseValue(string input)=>Regex.Match(input, valueReg).Value.Replace(">","").Replace("<","");
 
-        internal string TitleLink {get;private set;}
-        internal string AuthorLink {get;private set;}
-        internal string ImageLink {get;private set;}
+        const string anchorReg = "<a.*?/a>";
+        const string valueReg = ">.*?<";
+        const string imgLinkReg = "<img.*?/>";
+
+        internal string Title {get;private set;}
+        internal string Author {get;private set;}
+        
+        //Commenting these in case I decide to add images back
+        //internal string Image {get;private set;}
+        //private static string ParseImage(string input)=>Regex.Match(input,imgLinkReg).Value;
     }
 }
