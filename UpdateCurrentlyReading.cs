@@ -4,11 +4,8 @@ using System.Linq;
 using System.ServiceModel.Syndication;
 using System.Text;
 using System.Xml;
-using System.Xml.Linq;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions;
 
 namespace goodreads_readme
 {
