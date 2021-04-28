@@ -15,8 +15,15 @@ namespace goodreads_readme
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,[Blob("books/currentlyReading.json")] byte[] storageBlob, ILogger log)
         {
             log.LogInformation("Goodreads request processed.");
-            log.LogInformation(Encoding.ASCII.GetString(storageBlob));
-            return new FileContentResult(storageBlob,"image/svg+xml");
+            try
+            {    
+                log.LogInformation(Encoding.ASCII.GetString(storageBlob));
+                return new FileContentResult(storageBlob,"image/svg+xml");
+            }
+            catch
+            {
+                return new NoContentResult();
+            }
         }
     }
 }
